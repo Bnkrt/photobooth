@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vintage Photobooth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-image: url('Adsız tasarım-7.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: #000000;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .booth-container {
+            background: #f5e6d3;
+            padding: 30px 40px 40px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
+            border: 8px solid #000000;
+            position: relative;
+        }
+
+        .booth-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #ac0000;
+            border-bottom: 3px double #8b6b4d;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-family: 'Times New Roman', serif;
+        }
+        .booth-title span {
+            display: inline-block;
+            transform: rotate(-2deg);
+        }
+
+        .camera-area {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 20px;
+            border: 4px solid #5a3f2b;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        #video {
+            width: 100%;
+            max-height: 400px;
+            background: #000;
+            border-radius: 8px;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.6);
+            border-radius: 12px;
+            z-index: 10;
+        }
+        .countdown-overlay.active {
+            display: flex;
+        }
+        .countdown-number {
+            font-size: 120px;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Times New Roman', serif;
+            text-shadow: 0 0 40px rgba(255,200,100,0.5);
+            animation: pulse 0.8s ease-in-out infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 15px 0 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 35px;
+            font-size: 17px;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1.5px;
+            position: relative;
+            top: 0;
+        }
+
+    
+        .btn-capture {
+            background: #a22a2a; 
+            color: #f5e6d3;
+            box-shadow: 0 5px 0 #6b1414; 
+        }
+        .btn-capture:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #6b1414;
+            background: #b83131;
+        }
+        .btn-capture:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #6b1414;
+        }
+        .btn-capture:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 4px 0 #6b1414 !important;
+        }
+
+    
+        .btn-reset {
+            background: #f54d41;
+            color: #ffffff;
+            box-shadow: 0 5px 0 #b83026;
+        }
+        .btn-reset:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #b83026;
+            background: #fc5e52;
+        }
+        .btn-reset:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #b83026;
+        }
+
+        
+        .btn-download {
+            background: #f87373;
+            color: #ffffff;
+            box-shadow: 0 5px 0 #c24848; 
+        }
+        .btn-download:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #c24848;
+            background: #fa8282;
+        }
+        .btn-download:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 #c24848;
+        }
+        .btn-download:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 4px 0 #c24848 !important;
+        }
+
+        
+        .photostrip {
+            background: #e8d5c4;
+            padding: 15px 15px 5px 15px;
+            border-radius: 8px;
+            border: 6px solid #d4b8a0;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+            margin-top: 10px;
+            display: none;
+        }
+        .photostrip.visible {
+            display: block;
+        }
+
+        .strip-title {
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            font-size: 14px;
+            letter-spacing: 6px;
+            color: #5a3f2b;
+            border-bottom: 1px dashed #8b6b4d;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        #strip-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        #strip-container img {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            border: 2px solid #b8957a;
+            border-radius: 4px;
+           
+            filter: sepia(0.8) contrast(1.1) brightness(0.9);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            transition: transform 0.2s ease;
+        }
+        #strip-container img:hover {
+            transform: scale(1.02);
+        }
+
+        .brand {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 13px;
+            letter-spacing: 3px;
+            color: #8b6b4d;
+            font-family: 'Times New Roman', serif;
+            border-top: 1px solid #d4b8a0;
+            padding-top: 12px;
+        }
+        .brand span {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3d2317;
+        }
+
+        @media (max-width: 500px) {
+            .booth-container {
+                padding: 15px;
+            }
+            .booth-title {
+                font-size: 20px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+            .countdown-number {
+                font-size: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="booth-container">
+   
+    <div class="booth-title">
+    VINTAGE BOOTH
+</div>
+
+    
+    <div class="camera-area">
+        <video id="video" autoplay></video>
+        
+        <div class="countdown-overlay" id="countdownOverlay">
+            <div class="countdown-number" id="countdownNumber">3</div>
+        </div>
+    </div>
+
+    
+    <div class="btn-group">
+        <button class="btn btn-capture" id="startbutton"> FOTOĞRAF ÇEK</button>
+        <button class="btn btn-reset" id="resetbutton"> YENİDEN BAŞLA</button>
+        <button class="btn btn-download" id="downloadbutton" disabled> İNDİR</button>
+    </div>
+
+    
+    <div class="photostrip" id="photostrip">
+        <div class="strip-title">✦ F O T O S T R I P ✦</div>
+        <div id="strip-container"></div>
+        <div class="brand">
+            <span>bnkBooth.com</span> — since 2026
+        </div>
+    </div>
+</div>
+
+<script>
+
+    const video = document.getElementById('video');
+    const startButton = document.getElementById('startbutton');
+    const resetButton = document.getElementById('resetbutton');
+    const downloadButton = document.getElementById('downloadbutton');
+    const stripContainer = document.getElementById('strip-container');
+    const photostrip = document.getElementById('photostrip');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownNumber = document.getElementById('countdownNumber');
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    let photos = [];
+    let isCountdownRunning = false;
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+        .then(function(stream) {
+            video.srcObject = stream;
+            video.play();
+        })
+        .catch(function(err) {
+            console.log("Kamera hatası: " + err);
+            alert("Kameraya erişilemedi! Lütfen izin verin.");
+        });
+
+    function applySepia(imageData) {
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            
+            data[i] = Math.min(255, (r * 0.393) + (g * 0.769) + (b * 0.189));
+            data[i + 1] = Math.min(255, (r * 0.349) + (g * 0.686) + (b * 0.168));
+            data[i + 2] = Math.min(255, (r * 0.272) + (g * 0.534) + (b * 0.131));
+        }
+        return imageData;
+    }
+
+    function capturePhotoWithSepia() {
+       
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const sepiaData = applySepia(imageData);
+        context.putImageData(sepiaData, 0, 0);
+
+        
+        return canvas.toDataURL('image/jpeg', 0.9);
+    }
+
+  
+    function startCountdown() {
+        if (isCountdownRunning) return;
+        if (photos.length >= 4) {
+            alert('Zaten 4 fotoğraf çektin! Yeniden başla butonuna bas.');
+            return;
+        }
+
+        isCountdownRunning = true;
+        startButton.disabled = true;
+
+        let count = 3;
+        countdownNumber.textContent = count;
+        countdownOverlay.classList.add('active');
+
+        const interval = setInterval(function() {
+            count--;
+            if (count > 0) {
+                countdownNumber.textContent = count;
+                
+                countdownNumber.style.animation = 'none';
+                setTimeout(() => {
+                    countdownNumber.style.animation = 'pulse 0.8s ease-in-out infinite alternate';
+                }, 10);
+            } else {
+                clearInterval(interval);
+                countdownOverlay.classList.remove('active');
+                countdownNumber.style.animation = 'pulse 0.8s ease-in-out infinite alternate';
+
+                const sepiaPhoto = capturePhotoWithSepia();
+                photos.push(sepiaPhoto);
+
+                photostrip.classList.add('visible');
+                renderStrip();
+
+                isCountdownRunning = false;
+                startButton.disabled = false;
+
+            
+                if (photos.length === 4) {
+                    startButton.textContent = '✅ TAMAMLANDI';
+                    startButton.style.opacity = '0.6';
+                    startButton.style.cursor = 'default';
+                    downloadButton.disabled = false;
+                }
+            }
+        }, 800);
+    }
+
+    startButton.addEventListener('click', startCountdown);
+
+   
+    function renderStrip() {
+        stripContainer.innerHTML = '';
+        photos.forEach(function(url) {
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Fotoğraf';
+            stripContainer.appendChild(img);
+        });
+    }
+
+    
+    resetButton.addEventListener('click', function() {
+        
+        isCountdownRunning = false;
+        startButton.disabled = false;
+        countdownOverlay.classList.remove('active');
+
+        photos = [];
+        stripContainer.innerHTML = '';
+        photostrip.classList.remove('visible');
+        startButton.textContent = '🎞️ FOTOĞRAF ÇEK';
+        startButton.style.opacity = '1';
+        startButton.style.cursor = 'pointer';
+        downloadButton.disabled = true;
+    });
+
+    
+    downloadButton.addEventListener('click', function() {
+        if (photos.length !== 4) {
+            alert('Önce 4 fotoğraf çekmelisin!');
+            return;
+        }
+
+        const stripCanvas = document.createElement('canvas');
+        const stripCtx = stripCanvas.getContext('2d');
+
+        const imgWidth = 400;
+        const imgHeight = 300;
+        const gap = 6;
+        const padding = 20;
+
+        const totalHeight = (imgHeight * 4) + (gap * 3) + (padding * 2);
+        const totalWidth = imgWidth + (padding * 2);
+
+        stripCanvas.width = totalWidth;
+        stripCanvas.height = totalHeight;
+
+       
+        stripCtx.fillStyle = '#e8d5c4';
+        stripCtx.fillRect(0, 0, totalWidth, totalHeight);
+
+        photos.forEach(function(url, index) {
+            const img = new Image();
+            img.src = url;
+
+          
+            const yPos = padding + (index * (imgHeight + gap));
+            stripCtx.drawImage(img, padding, yPos, imgWidth, imgHeight);
+        });
+
+  
+        stripCtx.fillStyle = '#5a3f2b';
+        stripCtx.font = '14px Times New Roman, serif';
+        stripCtx.textAlign = 'center';
+        stripCtx.letterSpacing = '4px';
+        stripCtx.fillText('✦ boothNJ.com ✦', totalWidth / 2, totalHeight - 5);
+
+       
+        const finalImage = stripCanvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = 'fotostrip-' + new Date().getTime() + '.png';
+        link.href = finalImage;
+        link.click();
+        
+    });
+</script>
+
+</body>
+</html> 
